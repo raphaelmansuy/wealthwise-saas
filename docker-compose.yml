@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: saas_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d saas_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/saas_db
+      - PORT=8080
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - INTERNAL_API_URL=http://api:8080
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - NEXT_PUBLIC_CLERK_SIGN_IN_URL=${NEXT_PUBLIC_CLERK_SIGN_IN_URL}
+      - NEXT_PUBLIC_CLERK_SIGN_UP_URL=${NEXT_PUBLIC_CLERK_SIGN_UP_URL}
+      - NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL}
+      - NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=${NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - NEXT_PUBLIC_POSTHOG_KEY=${NEXT_PUBLIC_POSTHOG_KEY}
+      - NEXT_PUBLIC_POSTHOG_HOST=${NEXT_PUBLIC_POSTHOG_HOST}
+      - "PUBLIC_API_KEY_SECRET=${PUBLIC_API_KEY_SECRET:-5e4f8c2d71b9a4f0c3e6d8b271af5c904e3a1d72f68bc0951dea27cf84b6132a}"
+      - "ALLOW_INSECURE_PUBLIC_API=${ALLOW_INSECURE_PUBLIC_API:-false}"
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    ports:
+      - "3001:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/saas_db
+      - PORT=8080
+      - API_URL=${API_URL}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - INTERNAL_API_URL=http://api:8080
+      - CORS_ORIGINS=http://web:8080,http://localhost:8080
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - "PUBLIC_API_KEYS=${PUBLIC_API_KEYS:-primary:5e4f8c2d71b9a4f0c3e6d8b271af5c904e3a1d72f68bc0951dea27cf84b6132a}"
+      - "PUBLIC_API_TIMESTAMP_WINDOW_MS=${PUBLIC_API_TIMESTAMP_WINDOW_MS:-300000}"
+      - "ALLOW_INSECURE_PUBLIC_API=${ALLOW_INSECURE_PUBLIC_API:-false}"
+    volumes:
+      - ./apps/api:/app/apps/api
+      - ./packages:/app/packages
+      - /app/node_modules
+
+volumes:
+  postgres_data:

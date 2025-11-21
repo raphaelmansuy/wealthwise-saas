@@ -1,0 +1,38 @@
+{
+  "name": "saas-starter",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "dev:docker": "docker-compose up --build",
+    "dev:docker:background": "docker-compose up -d --build",
+    "dev:local": "turbo dev",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:logs:web": "docker-compose logs -f web",
+    "docker:logs:api": "docker-compose logs -f api",
+    "docker:logs:db": "docker-compose logs -f db",
+    "docker:restart": "docker-compose restart",
+    "docker:seed": "docker-compose exec api sh -c \"cd packages/db && bun run seed\"",
+    "db:push": "cd packages/db && bun run push",
+    "db:seed": "cd packages/db && bun run seed",
+    "db:studio": "cd packages/db && drizzle-kit studio",
+    "db:reset": "docker-compose down -v && docker-compose up -d db",
+    "sync-orders": "cd apps/api && bun run sync-orders",
+    "clean": "docker-compose down -v && rm -rf node_modules apps/*/node_modules packages/*/node_modules",
+    "install-bun": "bun install",
+    "setup": "./setup.sh",
+  "lint": "turbo lint -- --max-warnings=0",
+    "test": "turbo test"
+  },
+  "devDependencies": {
+    "shadcn": "^3.0.0",
+    "turbo": "^2.5.6"
+  },
+  "packageManager": "bun@1.0.0"
+}

@@ -1,0 +1,66 @@
+# Production Dockerfile for Hono.js API with Cloud SQL Auth Proxy support
+FROM oven/bun:latest as base
+
+# Set working directory
+WORKDIR /app
+
+# Copy workspace configuration files
+COPY package.json turbo.json ./
+
+# Copy package.json files for dependency resolution
+COPY apps/api/package.json ./apps/api/
+COPY packages/db/package.json ./packages/db/
+
+# Install dependencies (production only)
+RUN bun install --production
+
+# ================================
+# Development stage (for building)
+# ================================
+FROM base as builder
+
+# Install all dependencies (including dev dependencies)
+RUN bun install
+
+# Copy source code
+COPY apps/api ./apps/api
+COPY packages/db ./packages/db
+
+# Build the API application
+WORKDIR /app/apps/api
+RUN bun run build
+
+# ================================
+# Production stage
+# ================================
+FROM oven/bun:slim as production
+
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 hono
+
+# Create directory for Cloud SQL socket (shared with proxy sidecar)
+RUN mkdir -p /cloudsql && chown hono:nodejs /cloudsql
+
+# Copy built application from builder stage
+COPY --from=builder --chown=hono:nodejs /app/apps/api/dist ./dist
+COPY --from=builder --chown=hono:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=hono:nodejs /app/packages ./packages
+
+# Copy package.json for runtime
+COPY --from=builder --chown=hono:nodejs /app/apps/api/package.json ./
+
+# Switch to non-root user
+USER hono
+
+# Expose port (Cloud Run uses PORT environment variable)
+EXPOSE 8080
+
+# Health check (use PORT environment variable)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
+
+# Start the application
+CMD ["bun", "run", "dist/index.js"]

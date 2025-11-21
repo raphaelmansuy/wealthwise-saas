@@ -1,0 +1,29 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "build": "bun build --target node --outdir dist src/index.ts",
+    "start": "bun run dist/index.js",
+    "sync-orders": "bun run src/scripts/sync-orders.ts"
+  },
+  "dependencies": {
+    "@clerk/clerk-sdk-node": "^5.1.6",
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^1.1.0",
+    "@hono/zod-validator": "^0.1.11",
+    "@saas/db": "workspace:*",
+    "@sentry/node": "^7.91.0",
+    "drizzle-orm": "^0.29.0",
+    "hono": "^3.11.0",
+    "postgres": "^3.4.3",
+    "resend": "^3.2.0",
+    "stripe": "^14.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.0.0",
+    "drizzle-kit": "^0.20.0",
+    "tsx": "^4.7.0"
+  }
+}
