@@ -19,3 +19,7 @@ export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 export { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './pagination'
 export { Testimonial, TestimonialGrid } from './testimonial'
 export { TrustSignal, TrustSignals } from './trust-signals'
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs'
+export { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator, CommandShortcut } from './command'
+export { Popover, PopoverTrigger, PopoverContent } from './popover'
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tooltip'
