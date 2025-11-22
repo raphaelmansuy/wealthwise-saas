@@ -3,7 +3,7 @@ FROM oven/bun:latest
 WORKDIR /app
 
 # Copy root package files for workspace setup
-COPY package.json bun.lockb* ./
+COPY package.json bun.lock* ./
 COPY turbo.json ./
 
 # Copy package files for dependency resolution
@@ -11,7 +11,7 @@ COPY apps/api/package.json ./apps/api/
 COPY packages/db/package.json ./packages/db/
 
 # Install dependencies first (better caching)
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy db package source files
 COPY packages/db ./packages/db
