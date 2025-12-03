@@ -41,7 +41,7 @@
     "eslint-config-next": "15.5.2",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.542.0",
-    "next": "15.5.2",
+    "next": "15.5.7",
     "postcss": "^8",
     "posthog-js": "^1.96.0",
     "react": "19.1.1",
